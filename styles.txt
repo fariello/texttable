@@ -1,0 +1,182 @@
+Defining a style with four characters (backward compatible)
+════════════════════════════════════════════════════════════════════════════════
+
+    horizontal
+             ↓
+coner    → +----------+----------+ ⇐ Above Headers
+vertical → | header ↴ |          | ⇐ Header Row
+           +==========+==========+ ⇐ Header to Cell
+           |          |          | ⇐ Cell Row
+           +----------+----------+ ⇐ Between Cells
+           |          |          | ⇐ Cell Row
+           +----------+----------+ ⇐ Below Cells
+
+STRING FORMAT: [horizontal, vertical, corner, header]
+SRING LENGTH: 4
+ABOVE EXAMPLE: "-|+="
+EXAMPLE STYLE: "default"
+
+────────────────────────────────────────────────────────────────────────────────
+Defining a single-format style (headers and cell the same type of lines):
+════════════════════════════════════════════════════════════════════════════════
+      se     ew    sew           sw
+        ↘     ↓     ↓           ↙
+         ┌──────────┬──────────┐           ⇐ Above Headers
+    ns → │          │ ↙ nsew   │           ⇐ Header Row
+   nse → ├──────────┼──────────┤ ← nsw     ⇐ Header to Cell
+         │          │          │           ⇐ Cell Row
+         ├──────────┼──────────┤           ⇐ Between Cells
+         │          │          │           ⇐ Cell Row
+         └──────────┴──────────┘           ⇐ Below Cells
+       ↗            ↑           ↖
+     nw            new           ne
+
+STRING FORMAT [ew,ns,se,sw,nw,ne,nse,nsw,sew,new,nsew]
+SRING LENGTH: 11
+ABOVE EXAMPLE: "─│┌┐└┘├┤┬┴┼"
+EXAMPLE STYLE: "light"
+
+────────────────────────────────────────────────────────────────────────────────
+Defining a single header row format style (headers and cell the same
+type of lines, different separator between headers and cells):
+════════════════════════════════════════════════════════════════════════════════
+      se     ew    sew            sw
+        ↘     ↓     ↓           ↙
+         ┌──────────┬──────────┐           ⇐ Above Headers
+    ns → │ h2cew ↴  │ ↙ h2cnsew│           ⇐ Header Row
+h2cnse → ╞══════════╪══════════╡ ← h2cnsw  ⇐ Header to Cell
+       → │   ew ↴   │ ↙ nsew   │           ⇐ Cell Row
+ nse   → ├──────────┼──────────┤ ← nsw     ⇐ Between Cells
+         │          │          │           ⇐ Cell Row
+         └──────────┴──────────┘           ⇐ Below Cells
+       ↗            ↑           ↖
+     nw            new           ne
+STRING FORMAT [ew,ns,se,sw,nw,ne,nse,nsw,sew,new,nsew,h2cew,h2cnse,h2cnsw,h2cnsew]
+SRING LENGTH: 15
+ABOVE EXAMPLE: "─│┌┐└┘├┤┬┴┼═╞╡╪"
+EXAMPLE STYLE: "double_header"
+
+────────────────────────────────────────────────────────────────────────────────
+Defining a multiple header rows format style:
+════════════════════════════════════════════════════════════════════════════════
+      se    hew    sew           sw
+        ↘     ↓     ↓           ↙
+         ╔══════════╦══════════╗           ⇐ Above Headers
+hns    → ║ bhew ↴   ║ ↙ bhnsew ║           ⇐ Header Row
+bhnse  → ╟┄┄┄┄┄┄┄┄┄┄╫┄┄┄┄┄┄┄┄┄┄╣ ← bhnsw   ⇐ Between Headers
+         ║ h2cew ↴  ║↙ h2cnsew ║           ⇐ Header Row
+h2cnse → ╠══════════╬══════════╣ ← h2cnsw  ⇐ Header to Cell
+  ns   → ┃          ┃ ↙ nsew   ┃           ⇐ Cell Row
+ nse   → ┣━━━━━━━━━━╋━━━━━━━━━━┫ ← nsw     ⇐ Between Cells
+         ┃          ┃          ┃           ⇐ Cell Row
+         ┗━━━━━━━━━━┻━━━━━━━━━━┛           ⇐ Below Cells
+       ↗      ↑     ↑           ↖
+     nw      ew    new           ne
+STRING FORMAT [ew,ns,se,sw,nw,ne,nse,nsw,sew,new,nsew,h2cew,h2cnse,h2cnsw,h2cnsew,bhew,bhnse,bhnsw,bhnsew]
+SRING LENGTH: 19
+ABOVE EXAMPLE: "─│┌┐└┘├┤╦┴┼═╠╣╬┄╟╢╫"
+EXAMPLE STYLE: "double_special"
+
+────────────────────────────────────────────────────────────────────────────────
+Build-in Styles
+════════════════════════════════════════════════════════════════════════════════
+┌─────────────────────────┬─────────────────────────┬─────────────────────────┐
+│ Style "default"         │ Style "bold"            │ Style "double"          │
+│ +----------+----------+ │ ┏━━━━━━━━━━┳━━━━━━━━━━┓ │ ╔══════════╦══════════╗ │
+│ | Header 1 | Header 2 | │ ┃ Header 1 ┃ Header 2 ┃ │ ║ Header 1 ║ Header 2 ║ │
+│ +==========+==========+ │ ┣━━━━━━━━━━╋━━━━━━━━━━┫ │ ╠══════════╬══════════╣ │
+│ | Cell 1   | Cell 2   | │ ┃ Cell 1   ┃ Cell 2   ┃ │ ║ Cell 1   ║ Cell 2   ║ │
+│ +----------+----------+ │ ┣━━━━━━━━━━╋━━━━━━━━━━┫ │ ╠══════════╬══════════╣ │
+│ | Cell 3   | Cell 4   | │ ┃ Cell 3   ┃ Cell 4   ┃ │ ║ Cell 3   ║ Cell 4   ║ │
+│ +----------+----------+ │ ┗━━━━━━━━━━┻━━━━━━━━━━┛ │ ╚══════════╩══════════╝ │
+│                         │
+│ Def: "-|+="             │
+
+
+
+
+
+
+Style "double_header"
+┌──────────┬──────────┐
+│ Header 1 │ Header 2 │
+╞══════════╪══════════╡
+│ Cell 1   │ Cell 2   │
+├──────────┼──────────┤
+│ Cell 3   │ Cell 4   │
+└──────────┴──────────┘
+Style "double_header2"
+┌──────────┬──────────┐
+│ Header 1 │ Header 2 │
+╞══════════╪══════════╡
+│ Cell 1   │ Cell 2   │
+├──────────┼──────────┤
+│ Cell 3   │ Cell 4   │
+└──────────┴──────────┘
+Style "double_header3"
+  Header 1   Header 2
+═══════════════════════
+  Cell 1   │ Cell 2
+  Cell 3   │ Cell 4
+Style "double_header4"
+╒══════════╤══════════╕
+│ Header 1 │ Header 2 │
+╞══════════╪══════════╡
+│ Cell 1   │ Cell 2   │
+├──────────┼──────────┤
+│ Cell 3   │ Cell 4   │
+└──────────┴──────────┘
+Style "double_header5"
+╔══════════╦══════════╗
+║ Header 1 ║ Header 2 ║
+╚══════════╩══════════╝
+  Cell 1     Cell 2
+  Cell 3     Cell 4
+Style "double_header6"
+╔══════════╦══════════╗
+║ Header 1 ║ Header 2 ║
+╠══════════╬══════════╣
+┃ Cell 1   ┃ Cell 2   ┃
+┣━━━━━━━━━━╋━━━━━━━━━━┫
+┃ Cell 3   ┃ Cell 4   ┃
+┗━━━━━━━━━━┻━━━━━━━━━━┛
+
+Style "light"
+┌──────────┬──────────┐
+│ Header 1 │ Header 2 │
+├──────────┼──────────┤
+│ Cell 1   │ Cell 2   │
+├──────────┼──────────┤
+│ Cell 3   │ Cell 4   │
+└──────────┴──────────┘
+
+Style "light2
+  Header 1   Header 2
+───────────────────────
+  Cell 1   │ Cell 2
+  Cell 3   │ Cell 4
+
+Style "light3"
+  Header 1   Header 2
+┌──────────┬──────────┐
+│ Cell 1   │ Cell 2   │
+├──────────┼──────────┤
+│ Cell 3   │ Cell 4   │
+└──────────┴──────────┘
+
+Style "round"
+╭──────────┬──────────╮
+│ Header 1 │ Header 2 │
+├──────────┼──────────┤
+│ Cell 1   │ Cell 2   │
+├──────────┼──────────┤
+│ Cell 3   │ Cell 4   │
+╰──────────┴──────────╯
+Style "round2
+╭──────────┬──────────╮
+│ Header 1 │ Header 2 │
+╞══════════╪══════════╡
+│ Cell 1   │ Cell 2   │
+├──────────┼──────────┤
+│ Cell 3   │ Cell 4   │
+╰──────────┴──────────╯
