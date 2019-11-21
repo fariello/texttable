@@ -180,6 +180,10 @@ class FallbackToText(Exception):
 
 
 class UniTable:
+    BORDER = 1
+    HEADER = 1 << 1
+    HLINES = 1 << 2
+    VLINES = 1 << 3
     # --- gfariello -- Start -- Added to support new styles.
     TOP = 0
     MIDDLE  = 1
@@ -196,14 +200,14 @@ class UniTable:
         }
     STYLE_MAPPER = {
         "heavy": {
-            "---w": "",
-            "--e-": "",
+            "---w": " ",
+            "--e-": " ",
             "--ew": "━",
-            "-s--": "",
+            "-s--": " ",
             "-s-w": "┓",
             "-se-": "┏",
             "-sew": "┳",
-            "n---": "",
+            "n---": " ",
             "n--w": "┛",
             "n-e-": "┗",
             "n-ew": "┻",
@@ -213,14 +217,14 @@ class UniTable:
             "nsew": "╋",
         },
         "light": {
-            "---w": "",
-            "--e-": "",
+            "---w": " ",
+            "--e-": " ",
             "--ew": "-",
-            "-s--": "",
+            "-s--": " ",
             "-s-w": "┐",
             "-se-": "┌",
             "-sew": "┬",
-            "n---": "",
+            "n---": " ",
             "n--w": "┘",
             "n-e-": "└",
             "n-ew": "┴",
@@ -230,14 +234,14 @@ class UniTable:
             "nsew": "┼",
         },
         "round": {
-            "---w": "",
-            "--e-": "",
+            "---w": " ",
+            "--e-": " ",
             "--ew": "-",
-            "-s--": "",
+            "-s--": " ",
             "-s-w": "╮",
             "-se-": "╭",
             "-sew": "┬",
-            "n---": "",
+            "n---": " ",
             "n--w": "╯",
             "n-e-": "╰",
             "n-ew": "┴",
@@ -247,14 +251,14 @@ class UniTable:
             "nsew": "┼",
         },
         "double": {
-            "---w": "",
-            "--e-": "",
+            "---w": " ",
+            "--e-": " ",
             "--ew": "═",
-            "-s--": "",
+            "-s--": " ",
             "-s-w": "╗",
             "-se-": "╔",
             "-sew": "╦",
-            "n---": "",
+            "n---": " ",
             "n--w": "╝",
             "n-e-": "╚",
             "n-ew": "╩",
@@ -264,56 +268,57 @@ class UniTable:
             "nsew": "╬",
         },
         "heavy:light": {
-"---w:--e-": "╾",
-"---w:-s--": "┑",
-"---w:-se-": "┲",
-"---w:n---": "┙",
-"---w:n-e-": "┺",
-"---w:ns--": "┥",
-"---w:nse-": "┽",
-"--e-:---w": "╼",
-"--e-:-s--": "┍",
-"--e-:-s-w": "┮",
-"--e-:n---": "┙",
-"--e-:n--w": "┶",
-"--e-:ns--": "┝",
-"--e-:ns-w": "┾",
-"--ew:-s--": "┰",
-"--ew:n---": "┸",
-"--ew:ns--": "┿",
-"-s--:---w": "┒",
-"-s--:--e-": "┎",
-"-s--:--ew": "┰",
-"-s--:n---": "╽",
-"-s--:n--w": "┧",
-"-s--:n-e-": "┟",
-"-s--:n-ew": "╁",
-"-s-w:--e-": "┱",
-"-s-w:n---": "┧",
-"-s-w:n-e-": "╅",
-"-se-:---w": "┲",
-"-se-:n---": "┢",
-"-se-:n--w": "╆",
-"-sew:n---": "╈",
-"n---:---w": "┖",
-"n---:--e-": "┚",
-"n---:--ew": "┸",
-"n---:-s--": "╿",
-"n---:-s-w": "┦",
-"n---:-se-": "┞",
-"n---:-sew": "",
-"n--w:--e-": "",
-"n--w:-s--": "",
-"n--w:-se-": "",
-"n-e-:---w": "",
-"n-e-:-s--": "",
-"n-e-:-s-w": "",
-"n-ew:-s--": "",
-"ns--:---w": "",
-"ns--:--e-": "",
-"ns--:--ew": "",
-"ns-w:--e-": "",
-"nse-:---w": "",
+            "---w:--e-": "╾",
+            "---w:-s--": "┑",
+            "---w:-se-": "┲",
+            "---w:n---": "┙",
+            "---w:n-e-": "┺",
+            "---w:ns--": "┥",
+            "---w:nse-": "┽",
+            "--e-:---w": "╼",
+            "--e-:-s--": "┍",
+            "--e-:-s-w": "┮",
+            "--e-:n---": "┙",
+            "--e-:n--w": "┶",
+            "--e-:ns--": "┝",
+            "--e-:ns-w": "┾",
+            "--ew:-s--": "┰",
+            "--ew:n---": "┸",
+            "--ew:ns--": "┿",
+            "-s--:---w": "┒",
+            "-s--:--e-": "┎",
+            "-s--:--ew": "┰",
+            "-s--:n---": "╽",
+            "-s--:n--w": "┧",
+            "-s--:n-e-": "┟",
+            "-s--:n-ew": "╁",
+            "-s-w:--e-": "┱",
+            "-s-w:n---": "┧",
+            "-s-w:n-e-": "╅",
+            "-se-:---w": "┲",
+            "-se-:n---": "┢",
+            "-se-:n--w": "╆",
+            "-sew:n---": "╈",
+            "n---:---w": "┖",
+            "n---:--e-": "┚",
+            "n---:--ew": "┸",
+            "n---:-s--": "╿",
+            "n---:-s-w": "┦",
+            "n---:-se-": "┞",
+            "n---:-sew": "╀",
+            "n--w:--e-": "┹",
+            "n--w:-s--": "┩",
+            "n--w:-se-": "╃",
+            "n-e-:---w": "┺",
+            "n-e-:-s--": "┡",
+            "n-e-:-s-w": "╄",
+            "n-ew:-s--": "╇",
+            "ns--:---w": "┨",
+            "ns--:--e-": "┠",
+            "ns--:--ew": "╂",
+            "ns-w:--e-": "╉",
+            "nse-:---w": "╊",
+            }
             }
     # --- gfariello -- End -- Added to support new styles.
 
@@ -326,13 +331,13 @@ class UniTable:
         - max_width is an integer, specifying the maximum width of the table
         - if set to 0, size is unlimited, therefore cells won't be wrapped
         """
-        self.has_border = True
-        self.has_hline_between_headers = True
-        self.has_hline_header_2_cell = True
-        self.has_hline_between_cells = True
-        self.has_vline_between_headers = True
-        self.has_vline_header_2_cell = True
-        self.has_vline_between_cells = True
+        self._has_border = True
+        self._has_hline_between_headers = True
+        self._has_hline_header_2_cell = True
+        self._has_hline_between_cells = True
+        self._has_vline_between_headers = True
+        self._has_vline_header_2_cell = True
+        self._has_vline_between_cells = True
         self.set_max_width(max_width)
         self._precision = 3
 

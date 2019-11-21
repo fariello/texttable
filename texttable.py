@@ -197,13 +197,13 @@ class Texttable:
     BOTTOM = 2
     STYLES = {
         "bold":         "━┃┏┓┗┛┣┫┳┻╋━┣┫╋",
-        "default":      "-|+=",
         "double":       "═║╔╗╚╝╠╣╦╩╬═╠╣╬",
-        "very_light":   "─│┌┐└┘├┤┬┴┼",
-        "light":        "─│┌┐└┘├┤┬┴┼═╞╡╪",
-        "round":        "─│╭╮╰╯├┤┬┴┼",
+        "light":        "─│┌┐└┘├┤┬┴┼─├┤┼",
+        "light2":        "─│┌┐└┘├┤┬┴┼═╞╡╪",
+        "round":        "─│╭╮╰╯├┤┬┴┼─├┤┼",
         "round2":       "─│╭╮╰╯├┤┬┴┼═╞╡╪",
-        "simple":       "-|+-",
+        "simple":       "-|+++++++++-+++",
+        "simple2":      "-|+++++++++=+++",
         }
     # --- gfariello -- End -- Added to support new styles.
 
@@ -222,7 +222,7 @@ class Texttable:
 
         self._deco = Texttable.VLINES | Texttable.HLINES | Texttable.BORDER | \
             Texttable.HEADER
-        self.set_style("default")
+        self.set_style("simple2")
         self._pad = 1
         self.reset()
         # --- gfariello -- Start -- Added to support rows arg (i.e., adding
@@ -266,11 +266,11 @@ class Texttable:
         "bold":  Use unicode bold box borders (━┃┏┓┗┛┣┫┳┻╋)
         "double": Use unicode double box borders (═║╔╗╚╝╠╣╦╩╬)
 
-        Default if none provided is "light"
+        Default if none provided is "simple2"
         """
         if style in Texttable.STYLES:
             return self._set_chars(Texttable.STYLES[style])
-        raise ValueError("style must be one of '%s' not '%s'" %("','".join(sorted(Texttable.STYLES.keys())),box_type))
+        raise ValueError("style must be one of '%s' not '%s'" %("','".join(sorted(Texttable.STYLES.keys())),style))
 
     def _set_chars(self, array):
         """Set the characters used to draw lines between rows and columns in the following format:
@@ -291,7 +291,7 @@ class Texttable:
           hnsw,  # The character connecting north, south, and west to use for a line separating headers (e.g. "+" or "╡" )
           hnsew, # The character connecting north, south, east and west to use for a line separating headers (e.g. "+" or "╪" )
         ]
-        For legacy default it would be "-|+++++++++=+++"
+        For legacy simple2 (default) it would be "-|+++++++++=+++"
         """
         if len(array) != 15:
             raise ArraySizeError("string/array should contain 15 characters not %d as in '%s'" %(len(array),array))
@@ -866,18 +866,16 @@ if __name__ == '__main__':
     # Create a table of tables that shows different table styles
     styles = sorted(Texttable.STYLES.keys())
     t1 = Texttable([["STYLES"] + styles])
+    t1.set_padding(0)
     t1.set_max_width(0)
     t1.set_cols_align("l" + "c" * len(styles))
     t1.set_cols_valign("m" + "t" * len(styles))
-    t1.set_style("light2")
-    style_rows =[["Header 1","Header 2"],["Cell 1","Cell 2"],["Cell 3","Cell 4"],]
+    t1.set_style("light")
+    style_rows =[["H 1","H 2"],["C 1","C 2"],["C 3","C 4"],]
     t2 = Texttable(style_rows)
     for style in styles:
-        print("Style \"%s\"" %(style))
         t2.set_style(style)
-        print(t2.draw())
         pass
-    exit()
     t1.add_row(["DEFAULT"] + test_styles(t2))
     t2.set_padding(0)
     t1.add_row(["set_padding(0)"] + test_styles(t2))
