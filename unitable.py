@@ -139,9 +139,11 @@ from functools import reduce
 if sys.version_info >= (3, 0):
     unicode_type = str
     bytes_type = bytes
+    str_class = str
 else:
     unicode_type = unicode
     bytes_type = str
+    str_class = basestring
     pass
 
 def obj2unicode(obj):
@@ -178,6 +180,125 @@ class FallbackToText(Exception):
     """Used for failed conversion to float"""
     pass
 
+2
+class UTableBaseClass:
+    """
+    This is the base class for all UTable classes. It should probably not be instantiated directly.
+    """
+    def __init__(self,parent=None):
+        self.parent = parent
+        self.needs_recalc = True
+        pass
+    def _chktype(self,what,clss,val,none_ok=False):
+        if none_ok and val is None:
+            return val
+        if not isinstance(val, clss):
+            raise ValueError("ERROR: %s must be an instance of %s, '%s' is a %s." %(what,clss.__name__,val,type(val).__name__))
+        return val
+    def set_parent(self,val,clss):
+        self._parent = self._chktype('parent',clss,val,True)
+        pass
+    @property
+    def parent(self):
+        return self._parent
+    @parent.setter
+    def parent(self,val):
+        self.set_parent(val)
+        pass
+    @property
+    def needs_recalc(self):
+        return self._needs_recalc
+    @needs_recalc.setter
+    def needs_recalc(self,val):
+        self._chktype('needs_recalc',bool,val)
+        if self.parent is not None:
+            self.parent.needs_recalc = val
+            pass
+        self._needs_recalc = val
+        pass
+    @property
+    def width(self):
+        return self._width;
+    @width.setter
+    def width(self,val):
+        self._width = self._chktype('width',int,val,True)
+    @property
+    def witdth(self): return self._width;
+    @width.setter
+    def height(self,val):
+        self._height = self._chktype('height',int,val,True)
+
+class UTable:
+    def __init__(self,rows=[],parent=None):
+        super().__init__(self,parent)
+        self._min_width = None
+        self._max_width = None
+        self._height = None
+        self._rows = []
+        self._cols = []
+        pass
+    pass
+
+class URow:
+    def __init__(self,table,cells=[]):
+        super().__init__(parent)
+        pass
+    pass
+
+class UCol:
+    def __init__(self,table,cells=[]):
+        super().__init__(parent)
+        pass
+    pass
+
+class Cell:
+    def __init__(self,value="",row=None,col=None):
+        self._recalc = True
+        self.value = value
+        self.row = row
+        self.col = column
+        pass
+    @property
+    def value(self):
+        return self._value
+    @value.setter
+    def value(self,val):
+        if val == self._value:
+            return
+        self._recalc = True
+        if isinstance(val,str_class):
+            self._value = val.splitlines()
+        else:
+            self._value = [val]
+            pass
+        pass
+    @property
+    def row(self):
+        return self._row
+    @row.setter
+    def row(self,val):
+        if val == self._row:
+            return
+        if val is None or isinstance(val,int):
+            self._row = val
+            self._recalc = True
+            pass
+        raise ValueError("ERROR: row must be an integer. Received '%s' which is a %s." %(val,type(val).__name__))
+    @property
+    def col(self):
+        return self._col
+    @col.setter
+    def col(self,val):
+        if val == self._col:
+            return
+        if val is None or isinstance(val,int):
+            self._col = val
+            self._recalc = True
+            pass
+        raise ValueError("ERROR: col must be an integer. Received '%s' which is a %s." %(val,type(val).__name__))
+    @property
+    def width(self):
+        return self._width
 
 class UniTable:
     BORDER = 1
@@ -192,9 +313,9 @@ class UniTable:
         "bold":         "━┃┏┓┗┛┣┫┳┻╋━┣┫╋",
         "default":      "-|+=",
         "double":       "═║╔╗╚╝╠╣╦╩╬═╠╣╬",
-        "very_light":   "─│┌┐└┘├┤┬┴┼",
+        "very_light":   "─│┌┐└┘├┤┬┴┼─├┤┼",
         "light":        "─│┌┐└┘├┤┬┴┼═╞╡╪",
-        "round":        "─│╭╮╰╯├┤┬┴┼",
+        "round":        "─│╭╮╰╯├┤┬┴┼─├┤┼",
         "round2":       "─│╭╮╰╯├┤┬┴┼═╞╡╪",
         "simple":       "-|+-",
         }
@@ -332,6 +453,7 @@ class UniTable:
         - if set to 0, size is unlimited, therefore cells won't be wrapped
         """
         self._has_border = True
+        self._has_header = True
         self._has_hline_between_headers = True
         self._has_hline_header_2_cell = True
         self._has_hline_between_cells = True
@@ -362,8 +484,16 @@ class UniTable:
     def has_border(self):
         return self._has_border
     @has_border.setter
-    def has_boder(self,value):
+    def has_border(self,value):
         self._has_border = value
+        return value
+
+    @property
+    def has_header(self):
+        return self._has_header
+    @has_header.setter
+    def has_header(self,value):
+        self._has_header = value
         return value
 
     def reset(self):
@@ -397,8 +527,8 @@ class UniTable:
         Default if none provided is "light"
         """
         if style in UniTable.STYLES:
-            return self._set_chars(UniTable.STYLES[style])
-        raise ValueError("style must be one of '%s' not '%s'" %("','".join(sorted(UniTable.STYLES.keys())),box_type))
+            return self.set_chars(UniTable.STYLES[style])
+        raise ValueError("style must be one of '%s' not '%s'" %("','".join(sorted(UniTable.STYLES.keys())),style))
 
     def _set_chars(self, array):
         """Set the characters used to draw lines between rows and columns in the following format:
@@ -468,13 +598,13 @@ class UniTable:
             UniTable.BORDER: Border around the table
             UniTable.HEADER: Horizontal line below the header
             UniTable.HLINES: Horizontal lines between rows
-            Unitable.VLINES: Vertical lines between columns
+            UniTable.VLINES: Vertical lines between columns
 
            All of them are enabled by default
 
         - example:
 
-            Unitable.BORDER | Unitable.HEADER
+            UniTable.BORDER | UniTable.HEADER
         """
 
         self._deco = deco
@@ -644,12 +774,12 @@ class UniTable:
         self._compute_cols_width()
         self._check_align()
         out = ""
-        if self._has_border():
-            out += self._hline(location=Unitable.TOP)
+        if self.has_border:
+            out += self._hline(location=UniTable.TOP)
         if self._header:
             out += self._draw_line(self._header, isheader=True)
-            if self._has_header():
-                out += self._hline_header(location=Unitable.MIDDLE)
+            if self.has_header:
+                out += self._hline_header(location=UniTable.MIDDLE)
                 pass
             pass
         num = 0
@@ -657,10 +787,10 @@ class UniTable:
         for row in self._rows:
             num += 1
             out += self._draw_line(row)
-            if self._has_hlines() and num < length:
-                out += self._hline(location=Unitable.MIDDLE)
-        if self._has_border():
-            out += self._hline(location=Unitable.BOTTOM)
+            if self.has_hlines() and num < length:
+                out += self._hline(location=UniTable.MIDDLE)
+        if self._has_border:
+            out += self._hline(location=UniTable.BOTTOM)
         return out[:-1]
 
     @classmethod
@@ -757,29 +887,17 @@ class UniTable:
             raise ArraySizeError("array should contain %d elements not %s (array=%s)" \
                 %(self._row_size,len(array),array))
 
-    def _has_vlines(self):
+    def has_vlines(self):
         """Return a boolean, if vlines are required or not
         """
 
-        return self._deco & Unitable.VLINES > 0
+        return self._deco & UniTable.VLINES > 0
 
-    def _has_hlines(self):
+    def has_hlines(self):
         """Return a boolean, if hlines are required or not
         """
 
-        return self._deco & Unitable.HLINES > 0
-
-    def _has_border(self):
-        """Return a boolean, if border is required or not
-        """
-
-        return self._deco & Unitable.BORDER > 0
-
-    def _has_header(self):
-        """Return a boolean, if header line is required or not
-        """
-
-        return self._deco & Unitable.HEADER > 0
+        return self._deco & UniTable.HLINES > 0
 
     def _hline_header(self,location=MIDDLE):
         """Print header's horizontal line
@@ -800,25 +918,25 @@ class UniTable:
         rows
         """
         horiz_char = self._char_hew if is_header else self._char_ew
-        if Unitable.TOP == location:
+        if UniTable.TOP == location:
             left, mid, right = self._char_se, self._char_sew, self._char_sw
-        elif Unitable.MIDDLE == location:
+        elif UniTable.MIDDLE == location:
             if is_header:
                 left, mid, right = self._char_hnse, self._char_hnsew, self._char_hnsw
             else:
                 left, mid, right = self._char_nse, self._char_nsew, self._char_nsw
                 pass
-        elif Unitable.BOTTOM == location:
+        elif UniTable.BOTTOM == location:
             # NOTE: This will not work as expected if the table is only headers.
             left, mid, right = self._char_ne, self._char_new, self._char_nw
         else:
-            raise ValueError("Unknown location '%s'. Should be one of Unitable.TOP, Unitable.MIDDLE, or Unitable.BOTTOM." %(location))
+            raise ValueError("Unknown location '%s'. Should be one of UniTable.TOP, UniTable.MIDDLE, or UniTable.BOTTOM." %(location))
         # compute cell separator
-        s = "%s%s%s" % (horiz_char * self._pad, [horiz_char, mid][self._has_vlines()], horiz_char * self._pad)
+        s = "%s%s%s" % (horiz_char * self._pad, [horiz_char, mid][self.has_vlines()], horiz_char * self._pad)
         # build the line
         l = s.join([horiz_char * n for n in self._width])
         # add border if needed
-        if self._has_border():
+        if self.has_border:
             l = "%s%s%s%s%s\n" % (left, horiz_char * self._pad , l, horiz_char * self._pad ,right)
         else:
             l += "\n"
@@ -865,7 +983,7 @@ class UniTable:
 
         ncols = len(maxi)
         content_width = sum(maxi)
-        deco_width = 3*(ncols-1) + [0,4][self._has_border()]
+        deco_width = 3*(ncols-1) + [0,4][self.has_border]
         if self._max_width and (content_width + deco_width) > self._max_width:
             """ content too wide to fit the expected max_width
             let's recompute maximum cell width for each cell
@@ -905,7 +1023,7 @@ class UniTable:
         out = ""
         topmost,leftmost = True, True
         for i in range(len(line[0])):
-            if self._has_border():
+            if self.has_border:
                 out += "%s%s" %(self._char_ns, " " * self._pad)
             length = 0
             for cell, width, align in zip(line, self._width, self._align):
@@ -922,8 +1040,8 @@ class UniTable:
                 else:
                     out += cell_line + fill * space
                 if length < len(line):
-                    out += "%s%s%s" %(" " * self._pad, [space, self._char_ns][self._has_vlines()], " " * self._pad)
-            out += "%s\n" % ['', " " * self._pad + self._char_ns][self._has_border()]
+                    out += "%s%s%s" %(" " * self._pad, [space, self._char_ns][self.has_vlines()], " " * self._pad)
+            out += "%s\n" % ['', " " * self._pad + self._char_ns][self.has_border]
         return out
 
     def _splitit(self, line, isheader):
@@ -967,7 +1085,7 @@ def test_styles(table):
     return row
 
 if __name__ == '__main__':
-    table = Unitable()
+    table = UniTable()
     table.set_cols_align(["l", "r", "c"])
     table.set_cols_valign(["t", "m", "b"])
     table.add_rows([["Name", "Age", "Nickname"],
@@ -976,8 +1094,8 @@ if __name__ == '__main__':
                     ["Mme\nLouise\nBourgeau", 28, "Lou\n \nLoue"]])
     print(table.draw() + "\n")
 
-    table = Unitable()
-    table.set_deco(Unitable.HEADER)
+    table = UniTable()
+    table.set_deco(UniTable.HEADER)
     table.set_cols_dtype(['t',  # text
                           'f',  # float (decimal)
                           'e',  # float (exponent)
@@ -992,14 +1110,14 @@ if __name__ == '__main__':
     print(table.draw())
 
     # Create a table of tables that shows different table styles
-    styles = sorted(Unitable.STYLES.keys())
-    t1 = Unitable([["STYLES"] + styles])
+    styles = sorted(UniTable.STYLES.keys())
+    t1 = UniTable([["STYLES"] + styles])
     t1.set_max_width(0)
     t1.set_cols_align("l" + "c" * len(styles))
     t1.set_cols_valign("m" + "t" * len(styles))
-    t1.set_style("light2")
+    t1.set_style("light")
     style_rows =[["Header 1","Header 2"],["Cell 1","Cell 2"],["Cell 3","Cell 4"],]
-    t2 = Unitable(style_rows)
+    t2 = UniTable(style_rows)
     for style in styles:
         print("Style \"%s\"" %(style))
         t2.set_style(style)
@@ -1011,7 +1129,7 @@ if __name__ == '__main__':
     t1.add_row(["set_padding(0)"] + test_styles(t2))
     t2.set_padding(2)
     t1.add_row(["set_padding(2)"] + test_styles(t2))
-    t2.set_deco(Unitable.HEADER)
+    t2.set_deco(UniTable.HEADER)
     t2.set_padding(1)
     t1.add_row(["set_deco(HEADER)"] + test_styles(t2))
     print(t1.draw() + "\n")

@@ -5,3 +5,14 @@
 /__pycache__/
 *.egg-info/
 *.pyc
+### Emacs ###
+# -*- mode: gitignore; -*-
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+recentf
+tramp
+.\#*
